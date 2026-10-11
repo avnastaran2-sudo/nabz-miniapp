@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131a">
   <title>Nabz Voice</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
@@ -13,7 +15,7 @@
       place-items: center;
       background: #10131a;
       color: #f4f5f7;
-      font-family: sans-serif;
+      font-family: system-ui, sans-serif;
     }
     main { text-align: center; padding: 24px; }
     .orb {
@@ -21,27 +23,66 @@
       height: 112px;
       margin: 24px auto;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #9ee7ff, #4766d8 55%, #171c46);
-      box-shadow: 0 0 45px #4766d866;
+      background: radial-gradient(circle at 35% 30%, #c6a8ff, #7651d6 55%, #211440);
+      box-shadow: 0 0 45px #7651d666;
+      animation: pulse 3s ease-in-out infinite;
     }
+    h1 { letter-spacing: 2px; }
     p { color: #bdc3d1; line-height: 1.9; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .orb { animation: none; }
+    }
   </style>
 </head>
 <body>
   <main>
-    <div class="orb"></div>
-    <h1>نبض</h1>
-    <p>دستیار صوتی نبض</p>
+    <div class="orb" aria-hidden="true"></div>
+    <h1 id="heading">نبض</h1>
+    <p id="subtitle">دستیار صوتی نبض</p>
     <p id="status">صفحه با موفقیت بارگذاری شد.</p>
   </main>
+
   <script>
     const tg = window.Telegram?.WebApp;
+
     if (tg) {
       tg.ready();
       tg.expand();
-      document.getElementById("status").textContent =
-        "Mini App آماده است؛ اتصال صوتی هنوز راه‌اندازی نشده.";
     }
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedLang = params.get("lang");
+    const telegramLang = tg?.initDataUnsafe?.user?.language_code || "fa";
+
+    const lang = ["fa", "en"].includes(requestedLang)
+      ? requestedLang
+      : telegramLang.toLowerCase().startsWith("en") ? "en" : "fa";
+
+    const translations = {
+      fa: {
+        heading: "نبض",
+        subtitle: "دستیار صوتی نبض",
+        status: "صفحه با موفقیت بارگذاری شد.",
+        direction: "rtl"
+      },
+      en: {
+        heading: "Nabz",
+        subtitle: "Nabz Voice Assistant",
+        status: "The page loaded successfully.",
+        direction: "ltr"
+      }
+    };
+
+    const text = translations[lang];
+    document.documentElement.lang = lang;
+    document.documentElement.dir = text.direction;
+    document.getElementById("heading").textContent = text.heading;
+    document.getElementById("subtitle").textContent = text.subtitle;
+    document.getElementById("status").textContent = text.status;
   </script>
 </body>
 </html>
