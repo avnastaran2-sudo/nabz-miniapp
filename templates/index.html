@@ -140,8 +140,241 @@
       if (el) el.textContent = x[id];
     }
 
-    document.getElementById("start").addEventListener("click", () => {
-      document.getElementById("status").textContent = x.clicked;
+    const startButton = document.getElementById("start");
+    const statusEl = document.getElementById("status");
+
+    const replyEl = document.createElement("p");
+    replyEl.id = "reply";
+    replyEl.style.cssText =
+      "white-space:pre-wrap;overflow-wrap:anywhere;margin-top:18px;color:#eee7ff";
+    statusEl.insertAdjacentElement("afterend", replyEl);
+
+    let recorder = null;
+    let chunks = [];
+    let recording = false;
+    let stream = null;
+
+    const messages = {
+      fa: {
+        ready: "برای صحبت، روی دکمه بزن.",
+        recording: "دارم گوش می‌دم… برای پایان ضبط دوباره بزن.",
+        processing: "صدات رسید؛ دارم فکر می‌کنم…",
+        noTelegram: "نبض رو از داخل تلگرام باز کن.",
+        noMic: "دسترسی به میکروفون ممکن نیست. مجوز میکروفون رو بررسی کن.",
+        empty: "صدایی ضبط نشد؛ دوباره امتحان کن.",
+        failed: "ارتباط برقرار نشد؛ دوباره امتحان کن.",
+        stop: "⏹ پایان ضبط",
+        start: "🎙 شروع گفت‌وگو",
+        transcript: "تو گفتی: ",
+        answer: "نبض: "
+      },
+      en: {
+        ready: "Tap the button to speak.",
+        recording: "Listening… Tap again to finish recording.",
+        processing: "Audio received. Thinking…",
+        noTelegram: "Open Nabz from inside Telegram.",
+        noMic: "Microphone access failed. Check microphone permissions.",
+        empty: "No audio was recorded. Please try again.",
+        failed: "Connection failed. Please try again.",
+        stop: "⏹ Stop recording",
+        start: "🎙 Start Conversation",
+        transcript: "You said: ",
+        answer: "Nabz: "
+      }
+    };
+    const m = messages[lang];
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const trimmed = text.trim();
+
+      if (/[\u0600-\u06FF]/.test(trimmed)) {
+        utterance.lang = /[\u0750-\u077F]/.test(trimmed) ? "ar-SA" : "fa-IR";
+      } else if (/[\u0400-\u04FF]/.test(trimmed)) {
+        utterance.lang = "ru-RU";
+      } else if (/[\u4E00-\u9FFF]/.test(trimmed)) {
+        utterance.lang = "zh-CN";
+      } else if (/[\u3040-\u30FF]/.test(trimmed)) {
+        utterance.lang = "ja-JP";
+      } else if (/[\uAC00-\uD7AF]/.test(trimmed)) {
+        utterance.lang = "ko-KR";
+      } else if (/[\u0E00-\u0E7F]/.test(trimmed)) {
+        utterance.lang = "th-TH";
+      } else if (/[\u0900-\u097F]/.test(trimmed)) {
+        utterance.lang = "hi-IN";
+      } else if (/[\u0A80-\u0AFF]/.test(trimmed)) {
+        utterance.lang = "gu-IN";
+      } else if (/[\u0B80-\u0BFF]/.test(trimmed)) {
+        utterance.lang = "ta-IN";
+      } else if (/[\u0C00-\u0C7F]/.test(trimmed)) {
+        utterance.lang = "te-IN";
+      } else if (/[\u0D00-\u0D7F]/.test(trimmed)) {
+        utterance.lang = "ml-IN";
+      } else if (/[\u0980-\u09FF]/.test(trimmed)) {
+        utterance.lang = "bn-IN";
+      } else if (/[\u0B00-\u0B7F]/.test(trimmed)) {
+        utterance.lang = "or-IN";
+      } else if (/[\u0C80-\u0CFF]/.test(trimmed)) {
+        utterance.lang = "kn-IN";
+      } else if (/[\u0D80-\u0DFF]/.test(trimmed)) {
+        utterance.lang = "si-LK";
+      } else if (/[\u0E80-\u0EFF]/.test(trimmed)) {
+        utterance.lang = "lo-LA";
+      } else if (/[\u1780-\u17FF]/.test(trimmed)) {
+        utterance.lang = "km-KH";
+      } else if (/[\u1000-\u109F]/.test(trimmed)) {
+        utterance.lang = "my-MM";
+      } else if (/[\u10A0-\u10FF]/.test(trimmed)) {
+        utterance.lang = "ka-GE";
+      } else if (/[\u0530-\u058F]/.test(trimmed)) {
+        utterance.lang = "hy-AM";
+      } else if (/[\u0590-\u05FF]/.test(trimmed)) {
+        utterance.lang = "he-IL";
+      } else if (/[\u0600-\u06FF]/.test(trimmed)) {
+        utterance.lang = "ar-SA";
+      } else if (/[\u0F00-\u0FFF]/.test(trimmed)) {
+        utterance.lang = "bo-CN";
+      } else if (/[\u1200-\u137F]/.test(trimmed)) {
+        utterance.lang = "am-ET";
+      } else if (/[\u13A0-\u13FF]/.test(trimmed)) {
+        utterance.lang = "chr-US";
+      } else if (/[\u1400-\u167F]/.test(trimmed)) {
+        utterance.lang = "iu-CA";
+      } else if (/[\u1680-\u169F]/.test(trimmed)) {
+        utterance.lang = "oj-CA";
+      } else if (/[\u16A0-\u16FF]/.test(trimmed)) {
+        utterance.lang = "rw-RW";
+      } else if (/[\u1780-\u17FF]/.test(trimmed)) {
+        utterance.lang = "km-KH";
+      } else if (/[\u1800-\u18AF]/.test(trimmed)) {
+        utterance.lang = "mn-MN";
+      } else if (/[\u1E00-\u1EFF]/.test(trimmed)) {
+        utterance.lang = "vi-VN";
+      } else if (/[\u3040-\u30FF]/.test(trimmed)) {
+        utterance.lang = "ja-JP";
+      } else if (/[\u0E00-\u0E7F]/.test(trimmed)) {
+        utterance.lang = "th-TH";
+      } else if (/[\u0400-\u04FF]/.test(trimmed)) {
+        utterance.lang = "ru-RU";
+      } else if (/[\u0590-\u05FF]/.test(trimmed)) {
+        utterance.lang = "he-IL";
+      } else if (/[\u0600-\u06FF]/.test(trimmed)) {
+        utterance.lang = "ar-SA";
+      } else if (/[\u00C0-\u024F]/.test(trimmed)) {
+        utterance.lang = "en-US";
+      } else {
+        utterance.lang = "en-US";
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    async function uploadAudio(blob) {
+      if (!tg?.initData) {
+        statusEl.textContent = m.noTelegram;
+        return;
+      }
+
+      const form = new FormData();
+      const extension = blob.type.includes("ogg") ? "ogg" : "webm";
+      form.append("audio", blob, `recording.${extension}`);
+
+      try {
+        const response = await fetch("/api/voice", {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": tg.initData },
+          body: form
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || m.failed);
+
+        replyEl.textContent =
+          m.transcript + data.transcript + "\n\n" + m.answer + data.answer;
+        statusEl.textContent = "";
+        speak(data.answer);
+      } catch (error) {
+        statusEl.textContent = error.message || m.failed;
+      } finally {
+        startButton.disabled = false;
+        startButton.textContent = m.start;
+      }
+    }
+
+    async function startRecording() {
+      if (!tg?.initData) {
+        statusEl.textContent = m.noTelegram;
+        return;
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+        statusEl.textContent = lang === "fa"
+          ? "مرورگر این دستگاه ضبط صدا را پشتیبانی نمی‌کند."
+          : "Audio recording is not supported by this browser.";
+        return;
+      }
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const preferredTypes = [
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/ogg;codecs=opus"
+        ];
+        const mimeType = preferredTypes.find(
+          type => MediaRecorder.isTypeSupported(type)
+        );
+        recorder = mimeType
+          ? new MediaRecorder(stream, { mimeType })
+          : new MediaRecorder(stream);
+
+        chunks = [];
+        recorder.ondataavailable = event => {
+          if (event.data?.size) chunks.push(event.data);
+        };
+
+        recorder.onstop = async () => {
+          stream?.getTracks().forEach(track => track.stop());
+          stream = null;
+          recording = false;
+
+          const blob = new Blob(chunks, {
+            type: recorder.mimeType || "audio/webm"
+          });
+          if (!blob.size) {
+            statusEl.textContent = m.empty;
+            startButton.disabled = false;
+            startButton.textContent = m.start;
+            return;
+          }
+
+          statusEl.textContent = m.processing;
+          await uploadAudio(blob);
+        };
+
+        recorder.start();
+        recording = true;
+        startButton.textContent = m.stop;
+        statusEl.textContent = m.recording;
+      } catch (_error) {
+        stream?.getTracks().forEach(track => track.stop());
+        stream = null;
+        statusEl.textContent = m.noMic;
+      }
+    }
+
+    startButton.addEventListener("click", () => {
+      if (recording && recorder?.state === "recording") {
+        recorder.stop();
+        startButton.disabled = true;
+        startButton.textContent = lang === "fa" ? "در حال ارسال…" : "Sending…";
+      } else {
+        replyEl.textContent = "";
+        startRecording();
+      }
     });
   </script>
 </body>
