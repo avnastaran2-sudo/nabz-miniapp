@@ -66,8 +66,11 @@ def health():
 
 @app.post("/api/voice")
 def voice():
-    if not authorized_request():
-        return jsonify(error="لطفاً نبض را از داخل تلگرام باز کن."), 401
+    init_data = request.headers.get("X-Telegram-Init-Data", "")
+    if not init_data:
+        return jsonify(error="اطلاعات تلگرام به سرور نرسید؛ مینی‌اپ را ببند و دوباره از داخل ربات باز کن."), 401
+    if not verify_telegram_init_data(init_data):
+        return jsonify(error="تأیید اطلاعات تلگرام ناموفق بود؛ تنظیم BOT_TOKEN در Render را بررسی کن."), 401
 
     if not GROQ_API_KEY:
         return jsonify(error="تنظیم سرویس هوش مصنوعی کامل نیست."), 503
