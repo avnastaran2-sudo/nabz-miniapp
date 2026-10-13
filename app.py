@@ -49,6 +49,22 @@ def telegram_init_data_status(init_data):
         ).hexdigest()
 
         if not hmac.compare_digest(calculated_hash, received_hash):
+            try:
+                response = requests.get(
+                    f"https://api.telegram.org/bot{BOT_TOKEN.strip()}/getMe",
+                    timeout=5,
+                )
+                data = response.json()
+                bot_name = (
+                    "@" + data["result"]["username"]
+                    if data.get("ok") else "invalid_token"
+                )
+            except Exception:
+                bot_name = "check_failed"
+            app.logger.warning(
+                "Init data hash mismatch; configured_bot=%s",
+                bot_name,
+            )
             return "hash_mismatch"
         return "ok"
     except (TypeError, ValueError):
