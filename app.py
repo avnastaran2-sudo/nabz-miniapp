@@ -28,7 +28,6 @@ def telegram_init_data_status(init_data):
     try:
         values = dict(parse_qsl(init_data, keep_blank_values=True))
         received_hash = values.pop("hash", "")
-        values.pop("signature", None)
         if not received_hash:
             return "missing_hash"
 
