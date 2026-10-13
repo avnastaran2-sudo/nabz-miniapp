@@ -65,7 +65,13 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; }
     }
-  </style>
+
+    .voice-select {
+      display:block; width:100%; margin-top:10px; padding:13px 14px;
+      border:1px solid #ffffff22; border-radius:14px;
+      background:#191725; color:#f6f3ff; font-size:15px;
+    }
+</style>
 </head>
 <body>
   <main>
@@ -81,6 +87,15 @@
     <h1 id="heading">صدات رو می‌شنوم</h1>
     <p id="subtitle">با نبض صحبت کن؛ تجربه‌ای ساده و هوشمند.</p>
 
+    <label for="voiceLanguage" style="display:block;margin-top:20px;color:#c8b6ff;font-size:13px">زبان صدا</label>
+    <select id="voiceLanguage" class="voice-select" aria-label="زبان صدا">
+      <option value="fa">فارسی</option>
+      <option value="en-US">English</option>
+      <option value="tr-TR">Türkçe</option>
+      <option value="ko-KR">한국어</option>
+      <option value="ar-SA">العربية</option>
+      <option value="ru-RU">Русский</option>
+    </select>
     <button id="start" type="button">🎙 شروع گفت‌وگو</button>
     <p id="status" role="status">برای شروع، روی دکمه بزن.</p>
 
@@ -185,10 +200,38 @@
     const m = messages[lang];
 
     function speak(text) {
-      if (!("speechSynthesis" in window)) return;
+      if (!("speechSynthesis" in window) ||
+          typeof SpeechSynthesisUtterance === "undefined") {
+        statusEl.textContent = "مرورگر تلگرام از پخش گفتار پشتیبانی نمی‌کند.";
+        return;
+      }
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onerror = (event) => {
+        statusEl.textContent = "خطای پخش صدا: " + event.error;
+      };
+      const selectedVoiceLanguage =
+        document.getElementById("voiceLanguage")?.value || "fa";
+
+      const hasPersianLetters = /[پچژگکی]/.test(text);
+      if (
+        selectedVoiceLanguage !== "fa" &&
+        (!/[\u0600-\u06FF]/.test(text) ||
+         (selectedVoiceLanguage === "ar-SA" && !hasPersianLetters))
+      ) {
+        utterance.lang = selectedVoiceLanguage;
+        const prefix = selectedVoiceLanguage.split("-")[0].toLowerCase();
+        const voices = window.speechSynthesis.getVoices();
+        const voice =
+          voices.find(v => v.lang.toLowerCase() === selectedVoiceLanguage.toLowerCase()) ||
+          voices.find(v => v.lang.toLowerCase().startsWith(prefix + "-")) ||
+          voices.find(v => v.lang.toLowerCase() === prefix);
+        if (voice) utterance.voice = voice;
+        window.speechSynthesis.speak(utterance);
+        return;
+      }
+
       const trimmed = text.trim();
 
       if (/[\u0600-\u06FF]/.test(trimmed)) {
