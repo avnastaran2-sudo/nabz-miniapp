@@ -4,85 +4,145 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10131a">
-  <title>Nabz Voice</title>
+  <title>Nabz | Voice Assistant</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: #10131a;
-      color: #f4f5f7;
-      font-family: system-ui, sans-serif;
+      margin: 0; min-height: 100vh; padding: 24px;
+      display: grid; place-items: center;
+      background: radial-gradient(ellipse at top, #292044 0%, #141521 48%, #0c0e14 100%);
+      color: #f6f3ff; font-family: system-ui, sans-serif;
     }
-    main { text-align: center; padding: 24px; }
+    main { width: 100%; max-width: 420px; text-align: center; }
+    .brand { font-size: 14px; color: #c8b6ff; letter-spacing: 2px; }
+    .orb-wrap {
+      width: 180px; height: 180px; margin: 34px auto;
+      display: grid; place-items: center; position: relative;
+    }
+    .ring {
+      position: absolute; inset: 0; border: 1px solid #a98aff55;
+      border-radius: 50%; animation: breathe 3s ease-in-out infinite;
+    }
+    .ring:nth-child(2) { inset: 13px; animation-delay: .5s; }
     .orb {
-      width: 112px;
-      height: 112px;
-      margin: 24px auto;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #c6a8ff, #7651d6 55%, #211440);
-      box-shadow: 0 0 45px #7651d666;
+      width: 105px; height: 105px; border-radius: 50%;
+      background: radial-gradient(circle at 32% 25%, #eee4ff, #b18aff 24%, #7651d6 58%, #271746);
+      box-shadow: 0 0 45px #9565ff88, inset -8px -10px 25px #1d123c;
       animation: pulse 3s ease-in-out infinite;
     }
-    h1 { letter-spacing: 2px; }
-    p { color: #bdc3d1; line-height: 1.9; }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    h1 { font-size: 32px; margin: 8px 0 12px; }
+    p { color: #bcb9cc; line-height: 1.9; margin: 8px 0; }
+    .tag {
+      display: inline-block; border: 1px solid #ffffff18;
+      background: #ffffff08; border-radius: 30px;
+      padding: 8px 14px; color: #d4c5ff; font-size: 13px;
+    }
+    button {
+      width: 100%; border: 0; border-radius: 16px; padding: 16px;
+      margin-top: 24px; color: white; font-size: 16px; font-weight: 700;
+      background: linear-gradient(110deg, #9867f5, #6840c8);
+      box-shadow: 0 8px 28px #7950d944; cursor: pointer;
+    }
+    button:active { transform: scale(.98); }
+    #status { min-height: 28px; font-size: 13px; margin-top: 14px; }
+    .features {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-top: 30px;
+    }
+    .feature {
+      padding: 13px 5px; border: 1px solid #ffffff12;
+      background: #ffffff08; border-radius: 14px;
+      color: #d7d1e8; font-size: 12px; line-height: 1.7;
+    }
+    .feature span { display: block; font-size: 21px; margin-bottom: 5px; }
+    .lang { margin-top: 24px; font-size: 12px; color: #858198; }
+    @keyframes pulse { 50% { transform: scale(1.07); } }
+    @keyframes breathe {
+      0%, 100% { transform: scale(.94); opacity: .35; }
+      50% { transform: scale(1.06); opacity: .9; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .orb { animation: none; }
+      *, *::before, *::after { animation: none !important; }
     }
   </style>
 </head>
 <body>
   <main>
-    <div class="orb" aria-hidden="true"></div>
-    <h1 id="heading">نبض</h1>
-    <p id="subtitle">دستیار صوتی نبض</p>
-    <p id="status">صفحه با موفقیت بارگذاری شد.</p>
+    <div class="brand" id="brand">نبض</div>
+    <div class="tag" id="tag">دستیار صوتی هوشمند</div>
+
+    <div class="orb-wrap" aria-hidden="true">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="orb"></div>
+    </div>
+
+    <h1 id="heading">صدات رو می‌شنوم</h1>
+    <p id="subtitle">با نبض صحبت کن؛ تجربه‌ای ساده و هوشمند.</p>
+
+    <button id="start" type="button">🎙 شروع گفت‌وگو</button>
+    <p id="status" role="status">برای شروع، روی دکمه بزن.</p>
+
+    <div class="features">
+      <div class="feature"><span>🎙</span><b id="f1">گفت‌وگوی صوتی</b></div>
+      <div class="feature"><span>🧠</span><b id="f2">پاسخ هوشمند</b></div>
+      <div class="feature"><span>⚡</span><b id="f3">ساده و سریع</b></div>
+    </div>
+
+    <div class="lang" id="langLabel">فارسی</div>
   </main>
 
   <script>
     const tg = window.Telegram?.WebApp;
-
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
+    if (tg) { tg.ready(); tg.expand(); }
 
     const params = new URLSearchParams(window.location.search);
-    const requestedLang = params.get("lang");
+    const requested = params.get("lang");
     const telegramLang = tg?.initDataUnsafe?.user?.language_code || "fa";
+    const lang = ["fa", "en"].includes(requested)
+      ? requested
+      : (telegramLang.toLowerCase().startsWith("en") ? "en" : "fa");
 
-    const lang = ["fa", "en"].includes(requestedLang)
-      ? requestedLang
-      : telegramLang.toLowerCase().startsWith("en") ? "en" : "fa";
-
-    const translations = {
+    const t = {
       fa: {
-        heading: "نبض",
-        subtitle: "دستیار صوتی نبض",
-        status: "صفحه با موفقیت بارگذاری شد.",
-        direction: "rtl"
+        brand: "نبض", tag: "دستیار صوتی هوشمند",
+        heading: "صدات رو می‌شنوم",
+        subtitle: "با نبض صحبت کن؛ تجربه‌ای ساده و هوشمند.",
+        start: "🎙 شروع گفت‌وگو",
+        status: "برای شروع، روی دکمه بزن.",
+        clicked: "قابلیت گفت‌وگوی صوتی هنوز متصل نشده است.",
+        f1: "گفت‌وگوی صوتی", f2: "پاسخ هوشمند",
+        f3: "ساده و سریع", langLabel: "فارسی",
+        dir: "rtl"
       },
       en: {
-        heading: "Nabz",
-        subtitle: "Nabz Voice Assistant",
-        status: "The page loaded successfully.",
-        direction: "ltr"
+        brand: "NABZ", tag: "SMART VOICE ASSISTANT",
+        heading: "I'm listening",
+        subtitle: "Talk to Nabz for a simple, intelligent experience.",
+        start: "🎙 Start Conversation",
+        status: "Tap the button to get started.",
+        clicked: "Voice conversation is not connected yet.",
+        f1: "Voice Chat", f2: "Smart Answers",
+        f3: "Simple & Fast", langLabel: "English",
+        dir: "ltr"
       }
     };
 
-    const text = translations[lang];
+    const x = t[lang];
     document.documentElement.lang = lang;
-    document.documentElement.dir = text.direction;
-    document.getElementById("heading").textContent = text.heading;
-    document.getElementById("subtitle").textContent = text.subtitle;
-    document.getElementById("status").textContent = text.status;
+    document.documentElement.dir = x.dir;
+    document.title = lang === "fa" ? "نبض | دستیار صوتی" : "Nabz | Voice Assistant";
+
+    for (const id of ["brand", "tag", "heading", "subtitle", "start",
+                      "status", "f1", "f2", "f3", "langLabel"]) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = x[id];
+    }
+
+    document.getElementById("start").addEventListener("click", () => {
+      document.getElementById("status").textContent = x.clicked;
+    });
   </script>
 </body>
 </html>
