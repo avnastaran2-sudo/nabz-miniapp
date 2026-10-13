@@ -199,120 +199,55 @@
     };
     const m = messages[lang];
 
-    function speak(text) {
-      if (!("speechSynthesis" in window) ||
-          typeof SpeechSynthesisUtterance === "undefined") {
-        statusEl.textContent = "مرورگر تلگرام از پخش گفتار پشتیبانی نمی‌کند.";
-        return;
-      }
-      window.speechSynthesis.cancel();
+    let nabzAudio = null;
+    let nabzAudioUrl = null;
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.onerror = (event) => {
-        statusEl.textContent = "خطای پخش صدا: " + event.error;
-      };
-      const selectedVoiceLanguage =
-        document.getElementById("voiceLanguage")?.value || "fa";
-
-      const hasPersianLetters = /[پچژگکی]/.test(text);
-      if (
-        selectedVoiceLanguage !== "fa" &&
-        (!/[\u0600-\u06FF]/.test(text) ||
-         (selectedVoiceLanguage === "ar-SA" && !hasPersianLetters))
-      ) {
-        utterance.lang = selectedVoiceLanguage;
-        const prefix = selectedVoiceLanguage.split("-")[0].toLowerCase();
-        const voices = window.speechSynthesis.getVoices();
-        const voice =
-          voices.find(v => v.lang.toLowerCase() === selectedVoiceLanguage.toLowerCase()) ||
-          voices.find(v => v.lang.toLowerCase().startsWith(prefix + "-")) ||
-          voices.find(v => v.lang.toLowerCase() === prefix);
-        if (voice) utterance.voice = voice;
-        window.speechSynthesis.speak(utterance);
+    async function speak(text) {
+      const initData = window.Telegram?.WebApp?.initData || "";
+      if (!initData) {
+        statusEl.textContent = "برای پخش صدا، مینی‌اپ را از داخل ربات باز کن.";
         return;
       }
 
-      const trimmed = text.trim();
+      statusEl.textContent = "در حال ساخت صدای پاسخ…";
 
-      if (/[\u0600-\u06FF]/.test(trimmed)) {
-        utterance.lang = /[\u0750-\u077F]/.test(trimmed) ? "ar-SA" : "fa-IR";
-      } else if (/[\u0400-\u04FF]/.test(trimmed)) {
-        utterance.lang = "ru-RU";
-      } else if (/[\u4E00-\u9FFF]/.test(trimmed)) {
-        utterance.lang = "zh-CN";
-      } else if (/[\u3040-\u30FF]/.test(trimmed)) {
-        utterance.lang = "ja-JP";
-      } else if (/[\uAC00-\uD7AF]/.test(trimmed)) {
-        utterance.lang = "ko-KR";
-      } else if (/[\u0E00-\u0E7F]/.test(trimmed)) {
-        utterance.lang = "th-TH";
-      } else if (/[\u0900-\u097F]/.test(trimmed)) {
-        utterance.lang = "hi-IN";
-      } else if (/[\u0A80-\u0AFF]/.test(trimmed)) {
-        utterance.lang = "gu-IN";
-      } else if (/[\u0B80-\u0BFF]/.test(trimmed)) {
-        utterance.lang = "ta-IN";
-      } else if (/[\u0C00-\u0C7F]/.test(trimmed)) {
-        utterance.lang = "te-IN";
-      } else if (/[\u0D00-\u0D7F]/.test(trimmed)) {
-        utterance.lang = "ml-IN";
-      } else if (/[\u0980-\u09FF]/.test(trimmed)) {
-        utterance.lang = "bn-IN";
-      } else if (/[\u0B00-\u0B7F]/.test(trimmed)) {
-        utterance.lang = "or-IN";
-      } else if (/[\u0C80-\u0CFF]/.test(trimmed)) {
-        utterance.lang = "kn-IN";
-      } else if (/[\u0D80-\u0DFF]/.test(trimmed)) {
-        utterance.lang = "si-LK";
-      } else if (/[\u0E80-\u0EFF]/.test(trimmed)) {
-        utterance.lang = "lo-LA";
-      } else if (/[\u1780-\u17FF]/.test(trimmed)) {
-        utterance.lang = "km-KH";
-      } else if (/[\u1000-\u109F]/.test(trimmed)) {
-        utterance.lang = "my-MM";
-      } else if (/[\u10A0-\u10FF]/.test(trimmed)) {
-        utterance.lang = "ka-GE";
-      } else if (/[\u0530-\u058F]/.test(trimmed)) {
-        utterance.lang = "hy-AM";
-      } else if (/[\u0590-\u05FF]/.test(trimmed)) {
-        utterance.lang = "he-IL";
-      } else if (/[\u0600-\u06FF]/.test(trimmed)) {
-        utterance.lang = "ar-SA";
-      } else if (/[\u0F00-\u0FFF]/.test(trimmed)) {
-        utterance.lang = "bo-CN";
-      } else if (/[\u1200-\u137F]/.test(trimmed)) {
-        utterance.lang = "am-ET";
-      } else if (/[\u13A0-\u13FF]/.test(trimmed)) {
-        utterance.lang = "chr-US";
-      } else if (/[\u1400-\u167F]/.test(trimmed)) {
-        utterance.lang = "iu-CA";
-      } else if (/[\u1680-\u169F]/.test(trimmed)) {
-        utterance.lang = "oj-CA";
-      } else if (/[\u16A0-\u16FF]/.test(trimmed)) {
-        utterance.lang = "rw-RW";
-      } else if (/[\u1780-\u17FF]/.test(trimmed)) {
-        utterance.lang = "km-KH";
-      } else if (/[\u1800-\u18AF]/.test(trimmed)) {
-        utterance.lang = "mn-MN";
-      } else if (/[\u1E00-\u1EFF]/.test(trimmed)) {
-        utterance.lang = "vi-VN";
-      } else if (/[\u3040-\u30FF]/.test(trimmed)) {
-        utterance.lang = "ja-JP";
-      } else if (/[\u0E00-\u0E7F]/.test(trimmed)) {
-        utterance.lang = "th-TH";
-      } else if (/[\u0400-\u04FF]/.test(trimmed)) {
-        utterance.lang = "ru-RU";
-      } else if (/[\u0590-\u05FF]/.test(trimmed)) {
-        utterance.lang = "he-IL";
-      } else if (/[\u0600-\u06FF]/.test(trimmed)) {
-        utterance.lang = "ar-SA";
-      } else if (/[\u00C0-\u024F]/.test(trimmed)) {
-        utterance.lang = "en-US";
-      } else {
-        utterance.lang = "en-US";
+      try {
+        const language =
+          document.getElementById("voiceLanguage")?.value || "fa";
+
+        const response = await fetch("/api/tts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Init-Data": initData
+          },
+          body: JSON.stringify({ text, language })
+        });
+
+        if (!response.ok) {
+          throw new Error("ساخت صدای پاسخ ناموفق بود.");
+        }
+
+        const blob = await response.blob();
+        if (!blob.size) throw new Error("فایل صدای خالی دریافت شد.");
+
+        if (nabzAudioUrl) URL.revokeObjectURL(nabzAudioUrl);
+        nabzAudioUrl = URL.createObjectURL(blob);
+
+        if (!nabzAudio) {
+          nabzAudio = new Audio();
+          nabzAudio.preload = "auto";
+        }
+
+        nabzAudio.pause();
+        nabzAudio.src = nabzAudioUrl;
+        await nabzAudio.play();
+        statusEl.textContent = "";
+      } catch (error) {
+        statusEl.textContent =
+          "متن پاسخ آماده است، اما پخش صدا انجام نشد. اتصال اینترنت را بررسی کن.";
+        console.error("Nabz TTS:", error);
       }
-
-      window.speechSynthesis.speak(utterance);
     }
 
     async function uploadAudio(blob) {

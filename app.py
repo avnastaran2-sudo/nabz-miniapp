@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import hmac
 import io
@@ -7,7 +8,8 @@ import time
 from urllib.parse import parse_qsl
 
 import requests
-from flask import Flask, jsonify, render_template, request
+import edge_tts
+from flask import Flask, jsonify, render_template, request, send_file
 
 app = Flask(__name__, template_folder="templates")
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
@@ -168,6 +170,57 @@ def voice():
     except (ValueError, KeyError, IndexError, TypeError):
         app.logger.exception("Unexpected response from AI service")
         return jsonify(error="پاسخ نامعتبر از سرویس دریافت شد."), 502
+
+
+
+
+TTS_VOICES = {
+    "fa": "fa-IR-DilaraNeural",
+    "en-US": "en-US-AriaNeural",
+    "tr-TR": "tr-TR-EmelNeural",
+    "ko-KR": "ko-KR-SunHiNeural",
+    "ar-SA": "ar-SA-ZariyahNeural",
+    "ru-RU": "ru-RU-SvetlanaNeural",
+}
+
+
+async def generate_nabz_tts(text, voice):
+    import tempfile
+    from pathlib import Path
+    from io import BytesIO
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        audio_path = Path(temp_dir) / "nabz-voice.mp3"
+        await edge_tts.Communicate(text, voice).save(str(audio_path))
+        return BytesIO(audio_path.read_bytes())
+
+@app.post("/api/tts")
+def tts():
+    if not authorized_request():
+        return jsonify(error="تأیید اطلاعات تلگرام ناموفق بود."), 401
+
+    data = request.get_json(silent=True) or {}
+    text = str(data.get("text", "")).strip()
+    language = str(data.get("language", "fa")).strip()
+
+    if not text:
+        return jsonify(error="متنی برای تبدیل به صدا دریافت نشد."), 400
+    if len(text) > 2000:
+        return jsonify(error="متن برای تولید صدا بیش از حد طولانی است."), 413
+
+    voice = TTS_VOICES.get(language, TTS_VOICES["fa"])
+
+    try:
+        audio_buffer = asyncio.run(generate_nabz_tts(text, voice))
+        return send_file(
+            audio_buffer,
+            mimetype="audio/mpeg",
+            as_attachment=False,
+            download_name="nabz.mp3",
+        )
+    except Exception:
+        app.logger.exception("Nabz TTS generation failed")
+        return jsonify(error="ساخت صدای پاسخ ناموفق بود."), 502
 
 
 @app.errorhandler(413)
