@@ -19,20 +19,24 @@ TRANSCRIPTION_MODEL = "whisper-large-v3"
 CHAT_MODEL = "openai/gpt-oss-20b"
 
 
-def verify_telegram_init_data(init_data):
-    if not BOT_TOKEN or not init_data:
-        return False
+def telegram_init_data_status(init_data):
+    if not BOT_TOKEN:
+        return "missing_bot_token"
+    if not init_data:
+        return "missing_init_data"
 
     try:
         values = dict(parse_qsl(init_data, keep_blank_values=True))
         received_hash = values.pop("hash", "")
         if not received_hash:
-            return False
+            return "missing_hash"
 
         auth_date = int(values.get("auth_date", "0"))
         now = int(time.time())
-        if auth_date > now + 30 or now - auth_date > 86400:
-            return False
+        if auth_date > now + 30:
+            return "auth_date_in_future"
+        if now - auth_date > 86400:
+            return "auth_date_expired"
 
         data_check_string = "\n".join(
             f"{key}={value}" for key, value in sorted(values.items())
@@ -44,9 +48,15 @@ def verify_telegram_init_data(init_data):
             secret_key, data_check_string.encode(), hashlib.sha256
         ).hexdigest()
 
-        return hmac.compare_digest(calculated_hash, received_hash)
+        if not hmac.compare_digest(calculated_hash, received_hash):
+            return "hash_mismatch"
+        return "ok"
     except (TypeError, ValueError):
-        return False
+        return "invalid_data_format"
+
+
+def verify_telegram_init_data(init_data):
+    return telegram_init_data_status(init_data) == "ok"
 
 
 def authorized_request():
@@ -69,8 +79,10 @@ def voice():
     init_data = request.headers.get("X-Telegram-Init-Data", "")
     if not init_data:
         return jsonify(error="اطلاعات تلگرام به سرور نرسید؛ مینی‌اپ را ببند و دوباره از داخل ربات باز کن."), 401
-    if not verify_telegram_init_data(init_data):
-        return jsonify(error="تأیید اطلاعات تلگرام ناموفق بود؛ تنظیم BOT_TOKEN در Render را بررسی کن."), 401
+    auth_status = telegram_init_data_status(init_data)
+    if auth_status != "ok":
+        app.logger.warning("Telegram init data rejected: %s", auth_status)
+        return jsonify(error="تأیید اطلاعات تلگرام ناموفق بود؛ کد خطا: " + auth_status), 401
 
     if not GROQ_API_KEY:
         return jsonify(error="تنظیم سرویس هوش مصنوعی کامل نیست."), 503
