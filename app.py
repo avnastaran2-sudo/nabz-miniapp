@@ -42,7 +42,7 @@ def telegram_init_data_status(init_data):
             f"{key}={value}" for key, value in sorted(values.items())
         )
         secret_key = hmac.new(
-            BOT_TOKEN.strip().encode(), b"WebAppData", hashlib.sha256
+            b"WebAppData", BOT_TOKEN.strip().encode(), hashlib.sha256
         ).digest()
         calculated_hash = hmac.new(
             secret_key, data_check_string.encode(), hashlib.sha256
