@@ -1,4 +1,3 @@
-import sqlite3
 import asyncio
 import hashlib
 import hmac
@@ -136,73 +135,31 @@ def voice():
         if not transcript:
             return jsonify(error="صدایی قابل تشخیص نبود."), 422
 
-        # حافظه جداگانه برای هر کاربر تلگرام
-        try:
-            user_data = parse_qs(init_data).get("user", ["{}"])[0]
-            telegram_user = json.loads(user_data)
-            memory_id = str(telegram_user.get("id", ""))
-        except (ValueError, TypeError):
-            memory_id = ""
-
-        db_path = os.path.join(os.path.dirname(__file__), "nabz_memory.sqlite3")
-        history = []
-        if memory_id:
-            with sqlite3.connect(db_path, timeout=10) as db:
-                db.execute(
-                    "CREATE TABLE IF NOT EXISTS voice_memory "
-                    "(user_id TEXT PRIMARY KEY, history TEXT NOT NULL)"
-                )
-                row = db.execute(
-                    "SELECT history FROM voice_memory WHERE user_id=?",
-                    (memory_id,),
-                ).fetchone()
-                if row:
-                    try:
-                        history = json.loads(row[0])
-                    except (ValueError, TypeError):
-                        history = []
-
-        messages = [{
-            "role": "system",
-            "content": (
-                "تو نبض هستی؛ دستیار هوشمند، دقیق و خوش‌صحبت. "
-                "به زبان کاربر جواب بده. اگر فارسی حرف می‌زند، فارسی روان و "
-                "طبیعی بنویس؛ املای درست، لحن امروزی و جمله‌های روشن داشته باش. "
-                "پاسخ را متناسب با سؤال بده؛ نه بی‌دلیل طولانی و نه بیش از حد کوتاه. "
-                "حرف‌های قبلی همین کاربر را در نظر بگیر و سؤال‌های پیگیری را "
-                "با توجه به سابقه جواب بده. چیزی را که نمی‌دانی جعل نکن."
-            ),
-        }]
-        messages.extend(history[-20:])
-        messages.append({"role": "user", "content": transcript})
-
         chat_response = requests.post(
             f"{GROQ_BASE_URL}/chat/completions",
             headers={**headers, "Content-Type": "application/json"},
             json={
                 "model": CHAT_MODEL,
-                "messages": messages,
-                "temperature": 0.65,
-                "max_tokens": 1000,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are Nabz, a helpful multilingual voice assistant. "
+                            "Reply in the same language as the user's message. "
+                            "Be natural, warm, clear, and concise."
+                        ),
+                    },
+                    {"role": "user", "content": transcript},
+                ],
+                "temperature": 0.7,
+                "max_tokens": 700,
             },
             timeout=60,
         )
         chat_response.raise_for_status()
-        answer = chat_response.json()["choices"][0]["message"]["content"].strip()
-
-        if memory_id:
-            history.extend([
-                {"role": "user", "content": transcript[:4000]},
-                {"role": "assistant", "content": answer[:4000]},
-            ])
-            history = history[-20:]
-            with sqlite3.connect(db_path, timeout=10) as db:
-                db.execute(
-                    "INSERT INTO voice_memory(user_id, history) VALUES(?, ?) "
-                    "ON CONFLICT(user_id) DO UPDATE SET history=excluded.history",
-                    (memory_id, json.dumps(history, ensure_ascii=False)),
-                )
-
+        answer = (
+            chat_response.json()["choices"][0]["message"]["content"].strip()
+        )
         return jsonify(transcript=transcript, answer=answer)
 
     except requests.Timeout:
