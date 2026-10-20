@@ -84,7 +84,10 @@ def authorized_request():
 
 @app.get("/")
 def index():
-    return render_template("index.html")
+    lang = request.args.get("lang", "").lower()
+    if lang not in ("fa", "en"):
+        lang = ""
+    return render_template("index.html", page_lang=lang)
 
 
 @app.get("/health")
