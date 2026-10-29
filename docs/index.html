@@ -2,44 +2,54 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#10091f">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080510">
 <title>NABZ | نبض</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;
-background:radial-gradient(ellipse at 50% 35%,#422267 0%,#211333 38%,#10091f 76%);
-color:#fff;font-family:system-ui,sans-serif;text-align:center}
-main{width:min(100%,430px)}
-.brand{font-size:13px;letter-spacing:5px;color:#d8c2ff}
-h1{font-size:48px;margin:10px 0 4px}
-.sub{color:#c7b7da;font-size:15px}
-.heart{width:150px;height:150px;margin:34px auto;display:grid;place-items:center;
-border-radius:50%;font-size:54px;color:#fff;
-background:radial-gradient(circle at 35% 30%,#edc4ff,#a15ce4 42%,#432461 75%);
-box-shadow:0 0 28px #bd78ff88,inset 0 0 22px #fff3;
-animation:pulse 2.6s ease-in-out infinite}
-@keyframes pulse{50%{transform:scale(1.07);box-shadow:0 0 52px #ce8affaa,inset 0 0 30px #fff5}}
-.text{color:#e2d5f0;line-height:2;font-size:14px}
-button{width:100%;margin-top:20px;padding:15px;border:0;border-radius:15px;
-font-size:16px;font-weight:700;color:#1b0d2a;
-background:linear-gradient(100deg,#b78aff,#f0a3ed);cursor:pointer}
-.en{direction:ltr;color:#a99ab9;font-size:12px;line-height:1.8;margin-top:15px}
-footer{font-size:10px;letter-spacing:2px;color:#9581ae;margin-top:45px}
+html,body{margin:0;width:100%;min-height:100%;background:#080510;color:white;font-family:system-ui,sans-serif}
+body{min-height:100svh;overflow:hidden;background:radial-gradient(ellipse at 50% 48%,#24103c,#10091e 48%,#05030a)}
+#splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:pointer}
+.visual{width:min(92vw,560px);filter:drop-shadow(0 0 14px #a33dff66)}
+.ring{fill:none;stroke:#8e37ff;stroke-width:1.5;opacity:.65}
+.base{fill:none;stroke:#a94cff;stroke-width:2;opacity:.25}
+.ecg{fill:none;stroke:url(#g);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:900;stroke-dashoffset:900;animation:draw 2.4s ease-in-out infinite;filter:drop-shadow(0 0 7px #d56bff) drop-shadow(0 0 18px #872cff)}
+.glow{fill:none;stroke:#f3c6ff;stroke-width:1;stroke-linecap:round;stroke-dasharray:900;stroke-dashoffset:900;animation:draw 2.4s ease-in-out infinite}
+@keyframes draw{0%{stroke-dashoffset:900;opacity:.2}45%,75%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:-900;opacity:.2}}
+.brand{direction:ltr;margin-top:24px;font-size:clamp(20px,5vw,28px);font-weight:300;letter-spacing:.22em;color:#ead4ff;text-shadow:0 0 18px #b75cff}
+.brand span{letter-spacing:normal;margin:0 .2em;color:#b96cff}
+footer{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));font-size:10px;letter-spacing:.22em;color:#a68abf;direction:ltr;white-space:nowrap}
+#app{display:none;position:fixed;inset:0;width:100%;height:100%;border:0;background:#080510}
+body.entered #splash{display:none}
+body.entered #app{display:block}
+@media(prefers-reduced-motion:reduce){.ecg,.glow{animation:none;stroke-dashoffset:0}}
 </style>
 </head>
 <body>
-<main>
-<div class="brand">N A B Z</div>
-<h1>نبض</h1>
-<div class="sub">هم‌صدا با فکر تو</div>
-<div class="heart">♥</div>
-<div class="text">گاهی فقط کافیه شروع کنی.<br>نبض اینجاست تا بهت گوش بده.</div>
-<button onclick="location.href='https://nabz-miniapp-new.onrender.com/'">
-ورود به نبض
-</button>
-<div class="en">Your space to speak, think, and be heard.</div>
-<footer>OWNERSHIP : @nstrncnii</footer>
-</main>
+<div id="splash" role="button" aria-label="NABZ" tabindex="0">
+<svg class="visual" viewBox="0 0 560 300" aria-hidden="true">
+<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#7e2cff"/><stop offset=".48" stop-color="#fff0ff"/><stop offset="1" stop-color="#d64cff"/></linearGradient></defs>
+<circle class="ring" cx="280" cy="150" r="112"/>
+<circle class="ring" cx="280" cy="150" r="128" opacity=".25"/>
+<path class="base" d="M8 150 H170 L196 150 L215 130 L235 174 L258 54 L284 232 L310 128 L330 150 H552"/>
+<path class="ecg" d="M8 150 H170 L196 150 L215 130 L235 174 L258 54 L284 232 L310 128 L330 150 H552"/>
+<path class="glow" d="M8 150 H170 L196 150 L215 130 L235 174 L258 54 L284 232 L310 128 L330 150 H552"/>
+<circle cx="280" cy="150" r="4" fill="white"><animate attributeName="opacity" values=".2;1;.2" dur="1.2s" repeatCount="indefinite"/></circle>
+</svg>
+<div class="brand">NABZ <span>|</span> نبض</div>
+<footer>OWNERSHIP: @nstrncnii</footer>
+</div>
+<iframe id="app" title="NABZ" allow="microphone; autoplay; clipboard-read; clipboard-write"></iframe>
+<script>
+const splash=document.getElementById('splash'),app=document.getElementById('app');
+function enter(){
+ document.body.classList.add('entered');
+ if(!app.src)app.src='https://nabz-miniapp-new.onrender.com/';
+}
+splash.addEventListener('click',enter);
+splash.addEventListener('keydown',e=>{
+ if(e.key==='Enter'||e.key===' '){e.preventDefault();enter();}
+});
+</script>
 </body>
 </html>
