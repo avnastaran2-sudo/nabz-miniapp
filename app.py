@@ -10,6 +10,7 @@ from urllib.parse import parse_qsl
 import requests
 import edge_tts
 from flask import Flask, jsonify, render_template, request, send_file
+from db import init_db, database_status
 
 app = Flask(__name__, template_folder="templates")
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
@@ -230,6 +231,17 @@ def tts():
 def request_too_large(_error):
     return jsonify(error="حجم درخواست بیش از حد مجاز است."), 413
 
+
+
+
+@app.route("/health/db", methods=["GET"])
+def nabz_database_health():
+    try:
+        init_db()
+        return {"app": "Nabz Mini App", "database": database_status()}, 200
+    except Exception:
+        app.logger.exception("Nabz database initialization failed")
+        return {"app": "Nabz Mini App", "database": "unavailable"}, 503
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=False)
