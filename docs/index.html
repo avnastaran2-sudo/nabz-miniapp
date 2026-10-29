@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#100720">
+<title>NABZ | نبض</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;overflow:hidden;
+background:radial-gradient(ellipse at center,#49216c,#21102f 52%,#090510);
+color:white;font-family:Tahoma,sans-serif}
+.glow{position:fixed;width:280px;height:280px;border-radius:50%;background:#a855f7;
+filter:blur(100px);opacity:.2;animation:breathe 3s infinite}
+main{position:relative;text-align:center;padding:24px}
+svg{width:220px;max-width:75vw;filter:drop-shadow(0 0 12px #d98aff)}
+path{fill:none;stroke:url(#g);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;
+stroke-dasharray:500;stroke-dashoffset:500;animation:beat 2.5s ease-in-out infinite}
+h1{font:800 clamp(42px,12vw,66px) Arial,sans-serif;letter-spacing:.2em;margin:22px 0 8px}
+.fa{font-size:30px;color:#e5d4ff}
+hr{width:64px;border:0;height:2px;background:#d78cff;margin:24px auto}
+p{color:#cbbbdc}
+a{display:inline-block;margin-top:22px;padding:12px 24px;border:1px solid #b78cff88;
+border-radius:30px;color:white;text-decoration:none}
+footer{position:fixed;bottom:20px;width:100%;text-align:center;font:12px Arial,sans-serif;
+letter-spacing:2px;color:#a99abf}
+@keyframes beat{0%{stroke-dashoffset:500}55%,75%{stroke-dashoffset:0}100%{stroke-dashoffset:-500}}
+@keyframes breathe{50%{transform:scale(1.2);opacity:.3}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<main>
+<svg viewBox="0 0 260 120" aria-label="NABZ heartbeat">
+<defs><linearGradient id="g"><stop stop-color="#8b5cf6"/><stop offset=".5" stop-color="#ff8bd8"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs>
+<path d="M5 62H58L76 62 91 35 111 91 134 17 156 78 174 49 188 62H255"/>
+</svg>
+<h1>NABZ</h1>
+<div class="fa">نبض</div>
+<hr>
+<p>جایی برای شنیدن، فهمیدن و ارتباط</p>
+<a href="https://nabz-miniapp-new.onrender.com">ورود به نبض</a>
+</main>
+<footer>OWNERSHIP : @nstrncnii</footer>
+</body>
+</html>
