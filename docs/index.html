@@ -2,127 +2,44 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#10091f">
 <title>NABZ | نبض</title>
 <style>
-:root{color-scheme:dark;--bg:#10091f;--panel:#1b1030;--purple:#a77bff;--pink:#f18aff;--muted:#b8aacb}
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 50% 0,#352054 0,transparent 55%),var(--bg);color:#fff;font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center}
-main{width:min(100%,560px);padding:28px 20px calc(30px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:20px}
-.brand{font-size:13px;letter-spacing:3px;color:#d5c3ff;text-align:center}
-h1{font-size:34px;margin:5px 0 0;text-align:center}
-.sub{color:var(--muted);font-size:14px;text-align:center;margin:0}
-.orb{width:154px;height:154px;border-radius:50%;display:grid;place-items:center;margin:12px auto;background:radial-gradient(circle at 35% 30%,#e5b9ff,#8e4bdf 42%,#38205e 72%);box-shadow:0 0 35px #a45cff55,inset 0 0 25px #fff3;animation:pulse 3s ease-in-out infinite}
-.orb span{font-size:48px;font-weight:300}
-@keyframes pulse{50%{transform:scale(1.035);box-shadow:0 0 55px #c477ff77,inset 0 0 30px #fff4}}
-.card{width:100%;background:#1b1030dc;border:1px solid #ffffff16;border-radius:22px;padding:20px;box-shadow:0 15px 40px #0003}
-label{display:block;font-size:14px;margin-bottom:9px;color:#e4d9f6}
-select,textarea{width:100%;background:#10091f;color:white;border:1px solid #4a3265;border-radius:13px;padding:13px;font:inherit}
-textarea{min-height:95px;resize:vertical}
-button{width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:700;cursor:pointer}
-.primary{background:linear-gradient(100deg,#a16aff,#e28af7);color:#180b29}
-.secondary{background:#302044;color:#eee;margin-top:10px}
-button:disabled{opacity:.55;cursor:wait}
-#status{font-size:13px;color:#d7c4f4;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px}
-#answer{white-space:pre-wrap;line-height:1.9;overflow-wrap:anywhere}
-footer{color:#9886b4;font-size:11px;letter-spacing:1.5px;text-align:center;margin-top:auto;padding-top:15px}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;
+background:radial-gradient(ellipse at 50% 35%,#422267 0%,#211333 38%,#10091f 76%);
+color:#fff;font-family:system-ui,sans-serif;text-align:center}
+main{width:min(100%,430px)}
+.brand{font-size:13px;letter-spacing:5px;color:#d8c2ff}
+h1{font-size:48px;margin:10px 0 4px}
+.sub{color:#c7b7da;font-size:15px}
+.heart{width:150px;height:150px;margin:34px auto;display:grid;place-items:center;
+border-radius:50%;font-size:54px;color:#fff;
+background:radial-gradient(circle at 35% 30%,#edc4ff,#a15ce4 42%,#432461 75%);
+box-shadow:0 0 28px #bd78ff88,inset 0 0 22px #fff3;
+animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07);box-shadow:0 0 52px #ce8affaa,inset 0 0 30px #fff5}}
+.text{color:#e2d5f0;line-height:2;font-size:14px}
+button{width:100%;margin-top:20px;padding:15px;border:0;border-radius:15px;
+font-size:16px;font-weight:700;color:#1b0d2a;
+background:linear-gradient(100deg,#b78aff,#f0a3ed);cursor:pointer}
+.en{direction:ltr;color:#a99ab9;font-size:12px;line-height:1.8;margin-top:15px}
+footer{font-size:10px;letter-spacing:2px;color:#9581ae;margin-top:45px}
 </style>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 <main>
-<header>
 <div class="brand">N A B Z</div>
 <h1>نبض</h1>
-<p class="sub">هم‌صدا با فکر تو</p>
-<div class="orb" aria-hidden="true"><span>♥</span></div>
-</header>
-
-<section class="card">
-<label for="language">زبان پاسخ صوتی</label>
-<select id="language">
-<option value="Persian">فارسی</option>
-<option value="English">English</option>
-</select>
-<button id="record" class="primary" style="margin-top:16px">● شروع گفت‌وگوی صوتی</button>
-<div id="status" role="status">برای استفاده از میکروفون، نبض را از داخل ربات تلگرام باز کن.</div>
-</section>
-
-<section class="card">
-<label for="message">یا پیامت را بنویس</label>
-<textarea id="message" placeholder="هرچه در ذهنته بنویس…"></textarea>
-<button id="send" class="primary" style="margin-top:12px">ارسال پیام</button>
-<div id="answer" style="margin-top:14px"></div>
-</section>
-
+<div class="sub">هم‌صدا با فکر تو</div>
+<div class="heart">♥</div>
+<div class="text">گاهی فقط کافیه شروع کنی.<br>نبض اینجاست تا بهت گوش بده.</div>
+<button onclick="location.href='https://nabz-miniapp-new.onrender.com/'">
+ورود به نبض
+</button>
+<div class="en">Your space to speak, think, and be heard.</div>
 <footer>OWNERSHIP : @nstrncnii</footer>
 </main>
-<script>
-(() => {
-const API = "https://nabz-miniapp-new.onrender.com";
-const tg = window.Telegram?.WebApp;
-tg?.ready();
-tg?.expand();
-
-const status = document.getElementById("status");
-const answer = document.getElementById("answer");
-const recordBtn = document.getElementById("record");
-const sendBtn = document.getElementById("send");
-const initData = tg?.initData || "";
-let recorder, chunks = [], stream, recording = false;
-
-function setStatus(text){status.textContent=text}
-function headers(){return {"X-Telegram-Init-Data":initData}}
-
-async function sendAudio(blob){
- const data = new FormData();
- data.append("audio", blob, "nabz.webm");
- data.append("language", document.getElementById("language").value);
- setStatus("در حال اتصال به نبض… اگر سرور خواب باشد، اولین درخواست ممکن است کمی طول بکشد.");
- try {
-  const r = await fetch(API+"/api/voice",{method:"POST",headers:headers(),body:data});
-  const j = await r.json();
-  if(!r.ok) throw new Error(j.error || j.message || ("خطای سرور: "+r.status));
-  answer.textContent = j.answer || j.response || j.text || JSON.stringify(j);
-  setStatus("پاسخ دریافت شد.");
- } catch(e){setStatus("ارتباط برقرار نشد: "+e.message)}
-}
-recordBtn.addEventListener("click",async()=>{
- if(recording){recorder.stop();return}
- if(!initData){setStatus("این قابلیت را از داخل ربات تلگرام باز کن؛ لینک مستقیم مرورگر اطلاعات ورود تلگرام را ندارد.");return}
- try{
-  stream=await navigator.mediaDevices.getUserMedia({audio:true});
-  const type=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":"audio/webm";
-  recorder=new MediaRecorder(stream,{mimeType:type});chunks=[];
-  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
-  recorder.onstop=async()=>{
-   recording=false;recordBtn.textContent="● شروع گفت‌وگوی صوتی";
-   stream.getTracks().forEach(t=>t.stop());
-   const blob=new Blob(chunks,{type:recorder.mimeType||"audio/webm"});
-   await sendAudio(blob);
-  };
-  recorder.start();recording=true;
-  recordBtn.textContent="■ پایان ضبط و ارسال";
-  setStatus("در حال ضبط… برای پایان، دکمه را دوباره بزن.");
- }catch(e){setStatus("دسترسی به میکروفون ممکن نشد: "+e.message)}
-});
-sendBtn.addEventListener("click",async()=>{
- const text=document.getElementById("message").value.trim();
- if(!text)return;
- if(!initData){setStatus("برای ارسال پیام، نبض را از داخل ربات تلگرام باز کن.");return}
- sendBtn.disabled=true;answer.textContent="";
- setStatus("در حال ارسال…");
- try{
-  const r=await fetch(API+"/api/voice",{method:"POST",headers:{"X-Telegram-Init-Data":initData},body:(()=>{const d=new FormData();d.append("text",text);d.append("language",document.getElementById("language").value);return d})()});
-  const j=await r.json();
-  if(!r.ok)throw new Error(j.error||j.message||("خطای سرور: "+r.status));
-  answer.textContent=j.answer||j.response||j.text||JSON.stringify(j);
-  setStatus("پاسخ دریافت شد.");
- }catch(e){setStatus("خطا: "+e.message)}
- finally{sendBtn.disabled=false}
-});
-})();
-</script>
 </body>
 </html>
