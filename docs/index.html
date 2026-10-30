@@ -2105,7 +2105,6 @@ if('speechSynthesis'in window)speechSynthesis.getVoices();
 </div>
 <p class="cm-muted">برای تغییر عکس، روی + بزن</p>
 </div>
-<label>نام نمایشی</label><input id="cd" class="cm-field" maxlength="60" placeholder="نام به هر زبانی">
 <label>نام کاربری</label><input id="cu" class="cm-field" maxlength="30" placeholder="username">
 <p class="cm-muted">۴ تا ۳۰ حرف انگلیسی، عدد یا زیرخط؛ شروع با حرف انگلیسی.</p>
 <button id="cs" class="cm-btn" style="width:100%">ذخیره تغییرات</button>
@@ -2348,7 +2347,7 @@ presets.forEach((v,i)=>{
   $('cmAvatarPresets').append(b);
 });
 $('cmPhoto').onchange=()=>{const f=$('cmPhoto').files[0];if(!f)return;if(!f.type.startsWith('image/'))return say('فقط عکس انتخاب کن');if(f.size>12000000)return say('عکس باید کمتر از ۱۲ مگابایت باشد');const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),sc=Math.min(1,256/Math.max(im.width,im.height));c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));c.getContext('2d').drawImage(im,0,0,c.width,c.height);avatarPhoto=c.toDataURL('image/jpeg',.5);if(avatarPhoto.length>650000){const c2=document.createElement('canvas');c2.width=128;c2.height=128;c2.getContext('2d').drawImage(im,0,0,128,128);avatarPhoto=c2.toDataURL('image/jpeg',.4)}avatarChoice=avatarPhoto;setAvatar($('cmBigAvatar'),avatarPhoto);$('cmBigAvatar').append($('cmPick'));say('عکس آمادهٔ ذخیره است')};im.onerror=()=>say('خواندن عکس ممکن نشد');im.src=r.result};r.readAsDataURL(f)};
-$('cs').onclick=async()=>{try{await api('/profile',{username:$('cu').value,display_name:$('cd').value,avatar:avatarPhoto||avatarChoice});say('پروفایل ذخیره شد');await chats()}catch(e){say(e.message)}};
+$('cs').onclick=async()=>{try{await api('/profile',{username:$('cu').value,avatar:avatarPhoto||avatarChoice});say('پروفایل ذخیره شد');await chats()}catch(e){say(e.message)}};
 $('cf').onclick=async()=>{try{let j=await api('/search?q='+encodeURIComponent($('cq').value));$('cr').replaceChildren();j.items.forEach(p=>$('cr').append(card(p.display_name||p.username,'@'+p.username,p.avatar||'👤',async()=>{try{let x=await api('/dm',{username:p.username});await chats();showRoom(x.conversation_id,p.display_name||p.username,p.avatar||'👤')}catch(e){say(e.message)}})));if(!j.items.length)say('کاربری پیدا نشد')}catch(e){say(e.message)}};
 $('cmPlusGroup').onclick=()=>{$('cmCreatePanel').style.display=$('cmCreatePanel').style.display==='none'?'block':'none'};
 $('cmGroupPick').onclick=()=> $('cmGroupPhoto').click();
