@@ -1012,8 +1012,35 @@ padding:0!important;line-height:1!important;cursor:pointer!important
 }
 </style>
 
+<style id='nabz-splash-style'>
+#splash{position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:pointer;background:radial-gradient(ellipse at 50% 48%,#24103c,#10091e 48%,#05030a);color:white}
+#splash .visual{width:min(92vw,560px);filter:drop-shadow(0 0 14px #a33dff66)}
+#splash .ring{fill:none;stroke:#8e37ff;stroke-width:1.5;opacity:.65}
+#splash .base{fill:none;stroke:#a94cff;stroke-width:2;opacity:.25}
+#splash .ecg,#splash .glow{fill:none;stroke:url(#splashGradient);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:900;stroke-dashoffset:900;animation:splashDraw 2.4s ease-in-out infinite}
+#splash .glow{stroke:#f3c6ff;stroke-width:1}
+@keyframes splashDraw{0%{stroke-dashoffset:900;opacity:.2}45%,75%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:-900;opacity:.2}}
+#splash .brand{direction:ltr;margin-top:24px;font-size:clamp(20px,5vw,28px);font-weight:300;letter-spacing:.22em;color:#ead4ff;text-shadow:0 0 18px #b75cff}
+#splash footer{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));font-size:10px;letter-spacing:.22em;color:#a68abf;direction:ltr}
+#splash.hidden{display:none}
+@media(prefers-reduced-motion:reduce){#splash .ecg,#splash .glow{animation:none;stroke-dashoffset:0}}
+</style>
 </head>
 <body data-view="chat" data-theme="dark">
+
+<div id="splash" role="button" aria-label="NABZ" tabindex="0">
+<svg class="visual" viewBox="0 0 560 300" aria-hidden="true">
+<defs><linearGradient id="splashGradient" x1="0" x2="1"><stop stop-color="#7e2cff"/><stop offset=".48" stop-color="#fff0ff"/><stop offset="1" stop-color="#d64cff"/></linearGradient></defs>
+<circle class="ring" cx="280" cy="150" r="112"/><circle class="ring" cx="280" cy="150" r="128"/>
+<path class="base" d="M8 150 H170 L196 150 L215 130 L235 174 L258 54 L284 232 L310 128 L330 150 H552"/>
+<path class="ecg" d="M8 150 H170 L196 150 L215 130 L235 174 L258 54 L284 232 L310 128 L330 150 H552"/>
+<path class="glow" d="M8 150 H170 L196 150 L215 130 L235 174 L258 54 L284 232 L310 128 L330 150 H552"/>
+<circle cx="280" cy="150" r="4" fill="white"><animate attributeName="opacity" values=".2;1;.2" dur="1.2s" repeatCount="indefinite"/></circle>
+</svg>
+<div class="brand">NABZ <span>|</span> نبض</div>
+<footer>OWNERSHIP: @nstrncnii</footer>
+</div>
+
 <main>
   <div style="margin-bottom:12px"><select id="uiLang" aria-label="Interface language" style="background:#111a30;color:#fff;border:1px solid #6278aa66;border-radius:12px;padding:8px">
 <option value="fa">فارسی</option><option value="en">English</option><option value="tr">Türkçe</option><option value="ar">العربية</option><option value="ru">Русский</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="hi">हिन्दी</option>
@@ -2522,6 +2549,19 @@ $('cmCall').onclick=()=>say('تماس صوتی واقعی هنوز به زیرس
 })();
 </script>
 
+
+
+<script>
+(()=>{
+ const splash=document.getElementById('splash');
+ if(!splash)return;
+ function enter(){splash.classList.add('hidden');}
+ splash.addEventListener('click',enter);
+ splash.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();enter();}
+ });
+})();
+</script>
 
 </body>
 </html>
