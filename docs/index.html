@@ -1027,7 +1027,6 @@ padding:0!important;line-height:1!important;cursor:pointer!important
 </style>
 </head>
 <body data-view="chat" data-theme="dark">
-
 <div id="splash" role="button" aria-label="NABZ" tabindex="0">
 <svg class="visual" viewBox="0 0 560 300" aria-hidden="true">
 <defs><linearGradient id="splashGradient" x1="0" x2="1"><stop stop-color="#7e2cff"/><stop offset=".48" stop-color="#fff0ff"/><stop offset="1" stop-color="#d64cff"/></linearGradient></defs>
@@ -2068,6 +2067,19 @@ if('speechSynthesis'in window)speechSynthesis.getVoices();
 <div style="min-width:0;flex:1"><div class="cm-title" id="cmHeadTitle">NABZ · ارتباط</div><div class="cm-sub" id="cmHeadSub">فضای شخصی تو</div></div>
 <button id="cmExit" class="cm-btn2">خروج</button>
 </header>
+
+<div id="cmAuth" style="display:none;min-height:65vh;max-width:430px;margin:35px auto;padding:24px 20px;text-align:center">
+  <div style="font-size:34px;margin-bottom:12px">◈</div>
+  <h2 style="margin:8px 0">حساب دائمی نبض</h2>
+  <p class="cm-muted">با حساب خودت از هر دستگاه وارد فضای ارتباطی شو.</p>
+  <label style="display:block;text-align:right;margin-top:24px">نام کاربری</label>
+  <input id="authUsername" class="cm-field" maxlength="30" autocomplete="username" placeholder="username">
+  <label style="display:block;text-align:right;margin-top:14px">رمز عبور</label>
+  <input id="authPassword" class="cm-field" type="password" maxlength="128" autocomplete="current-password" placeholder="رمز عبور">
+  <button id="authLogin" class="cm-btn" type="button" style="width:100%;margin-top:18px">ورود</button>
+  <button id="authRegister" class="cm-btn" type="button" style="width:100%;margin-top:9px">ساخت حساب جدید</button>
+  <p id="authStatus" class="cm-muted" aria-live="polite"></p>
+</div>
 <div id="cmViews">
 <div class="cm-view active" id="cm-home">
 <h2 style="margin:4px 0 6px">ارتباط نبض</h2><p class="cm-muted">گفتگوها و گروه‌ها، یک‌جا و مرتب.</p>
@@ -2253,7 +2265,57 @@ async function load(){
     }
   }
 }
-$('openCommunication').onclick=async()=>{$('nabzCommunication').style.display='block';showView('cm-home');try{let j=await api('/me');currentUid=String(j.profile.uid||'');$('cu').value=j.profile.username||'';$('cd').value=j.profile.display_name||'';avatarPhoto=(j.profile.avatar||'').startsWith('data:image/')?j.profile.avatar:'';avatarChoice=DEFAULT_AVATAR;setAvatar($('cmBigAvatar'),avatarPhoto||DEFAULT_AVATAR);$('cin').style.display='none';try{await api('/support/inbox');$('cin').style.display='block'}catch(_){}await chats();say('آماده');}catch(e){say(e.message)}};
+async function enterCommunication(){
+  const me=await api('/me');
+  currentUid=String(me.profile.uid||'');
+  $('cu').value=me.profile.username||'';
+  $('cd').value=me.profile.display_name||'';
+  avatarPhoto=(me.profile.avatar||'').startsWith('data:image/')?me.profile.avatar:'';
+  avatarChoice=DEFAULT_AVATAR;
+  setAvatar($('cmBigAvatar'),avatarPhoto||DEFAULT_AVATAR);
+  $('cmAuth').style.display='none';
+  $('cmViews').style.display='block';
+  $('cmNav').style.display='flex';
+  showView('cm-home');
+  $('cin').style.display='none';
+  try{await api('/support/inbox');$('cin').style.display='block'}catch(_){}
+  await chats();
+  say('آماده');
+}
+$('openCommunication').onclick=async()=>{
+  $('nabzCommunication').style.display='block';
+  $('cmAuth').style.display='none';
+  $('cmViews').style.display='none';
+  $('cmNav').style.display='none';
+  $('cmRoom').style.display='none';
+  try{
+    await api('/me');
+    const status=await api('/auth/status');
+    if(status.authenticated){await enterCommunication();}
+    else{
+      $('cmAuth').style.display='block';
+      $('cmHeadTitle').textContent='حساب نبض';
+      $('cmHeadSub').textContent='ورود یا ثبت‌نام';
+      $('authStatus').textContent='برای ورود به بخش ارتباط، وارد حساب شو یا حساب جدید بساز.';
+    }
+  }catch(e){$('cmAuth').style.display='block';$('authStatus').textContent=e.message}
+};
+async function submitAuth(mode){
+  const username=$('authUsername').value.trim().replace(/^@/,'');
+  const password=$('authPassword').value;
+  if(!username||!password){$('authStatus').textContent='نام کاربری و رمز عبور را وارد کن.';return}
+  if(mode==='register'&&password.length<8){$('authStatus').textContent='رمز عبور باید حداقل ۸ کاراکتر باشد.';return}
+  $('authStatus').textContent='در حال بررسی...';
+  $('authLogin').disabled=true;$('authRegister').disabled=true;
+  try{
+    await api('/'+(mode==='register'?'register':'login'),{username,password});
+    $('authPassword').value='';
+    await enterCommunication();
+  }catch(e){$('authStatus').textContent=e.message}
+  finally{$('authLogin').disabled=false;$('authRegister').disabled=false}
+}
+$('authLogin').onclick=()=>submitAuth('login');
+$('authRegister').onclick=()=>submitAuth('register');
 function back(){if($('cmRoom').style.display==='block'){if(poll){clearInterval(poll);poll=null}cid='';showView(currentView);chats().catch(()=>{});return}if(currentView!=='cm-home'){showView('cm-home');return}$('nabzCommunication').style.display='none';if(poll){clearInterval(poll);poll=null}}
 $('commBack').onclick=back;$('cmExit').onclick=back;
 document.querySelectorAll('#cmNav [data-cmview]').forEach(b=>b.onclick=()=>showView(b.dataset.cmview));
@@ -2550,7 +2612,6 @@ $('cmCall').onclick=()=>say('تماس صوتی واقعی هنوز به زیرس
 </script>
 
 
-
 <script>
 (()=>{
  const splash=document.getElementById('splash');
@@ -2562,6 +2623,5 @@ $('cmCall').onclick=()=>say('تماس صوتی واقعی هنوز به زیرس
  });
 })();
 </script>
-
 </body>
 </html>
